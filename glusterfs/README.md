@@ -1,13 +1,14 @@
-```
+```Bash
 kubectl create -f glusterfs.yaml
 
 kubectl create -f heketi.yaml
 
 kubectl create clusterrolebinding heketi-gluster-admin --clusterrole=edit --serviceaccount=default:heketi-service-account
+
+kubectl exec -it "heketi-xxxxx-xxxx" /bin/bash
 ```
 
 ```
-kubectl exec -it "heketi-xxxxx-xxxx" /bin/bash
 
 cd /etc/heketi
 
