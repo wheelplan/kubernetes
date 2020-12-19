@@ -8,8 +8,7 @@ kubectl create clusterrolebinding heketi-gluster-admin --clusterrole=edit --serv
 kubectl exec -it "heketi-xxxxx-xxxx" /bin/bash
 ```
 
-```
-
+```Bash
 cd /etc/heketi
 
 add file topology.json
