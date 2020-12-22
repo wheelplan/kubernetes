@@ -3,22 +3,21 @@ controller:
   image:
     repository: cnych/ingress-nginx
     tag: "v0.41.2"
-    digest:
-    pullPolicy: IfNotPresent
+    digest: 
 
   dnsPolicy: ClusterFirstWithHostNet
-
+   
   hostNetwork: true
 
-  publishService:
+  publishService:  # hostNetwork 模式下设置为false，通过节点IP地址上报ingress status数据
     enabled: false
 
   kind: DaemonSet
 
-  nodeSelector:
-    kubernetes.io/hostname: master
+  nodeSelector: 
+   kubernetes.io/hostname: master 
 
-  service:
+  service:  # HostNetwork 模式不需要创建service
     enabled: false
 
 defaultBackend:
