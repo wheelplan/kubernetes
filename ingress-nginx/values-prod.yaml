@@ -1,0 +1,29 @@
+controller:
+  name: controller
+  image:
+    repository: cnych/ingress-nginx
+    tag: "v0.41.2"
+    digest:
+    pullPolicy: IfNotPresent
+
+  dnsPolicy: ClusterFirstWithHostNet
+
+  hostNetwork: true
+
+  publishService:
+    enabled: false
+
+  kind: DaemonSet
+
+  nodeSelector:
+    kubernetes.io/hostname: master
+
+  service:
+    enabled: false
+
+defaultBackend:
+  enabled: true
+  name: defaultbackend
+  image:
+    repository: cnych/ingress-nginx-defaultbackend
+    tag: "1.5"
