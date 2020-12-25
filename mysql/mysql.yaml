@@ -13,22 +13,23 @@ spec:
         app: mysql
     spec:
       containers:
-      - name: prometheus
+      - name: mysql
         image: mysql:5.6
         ports:
         - containerPort: 3306
         volumeMounts:
         - mountPath: "/var/lib/mysql"
           name: mysql-data
-        - mountPath: "/etc"
+        - mountPath: /etc/mysql/conf.d
           name: mysql-config
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: linux
         resources:
           requests:
-            memory: 300Mi
+            memory: 200Mi
           limits:
-            memory: 2000Mi
-      imagePullSecrets:
-        - name: regsecret
+            memory: 700Mi
       volumes:
       - name: mysql-config
         configMap:
@@ -63,5 +64,3 @@ spec:
   resources:
     requests:
       storage: 5Gi
-
----
