@@ -1,33 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: prometheus
+  name: mysql
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: prometheus
+      app: mysql
   template:
     metadata:
       labels:
-        app: prometheus
+        app: mysql
     spec:
       containers:
       - name: prometheus
-        image: prom/prometheus:v2.23.0
-        command:
-        - "/bin/prometheus"
-        args:
-        - "--config.file=/etc/prometheus/prometheus.yml"
-        - "--storage.tsdb.path=/prometheus"
-        - "--storage.tsdb.retention=1d"
+        image: mysql:5.6
         ports:
-        - containerPort: 9090
+        - containerPort: 3306
         volumeMounts:
-        - mountPath: "/prometheus"
-          name: prometheus-data
-        - mountPath: "/etc/prometheus"
-          name: config
+        - mountPath: "/var/lib/mysql"
+          name: mysql-data
+        - mountPath: "/etc"
+          name: mysql-config
         resources:
           requests:
             memory: 300Mi
@@ -36,32 +30,32 @@ spec:
       imagePullSecrets:
         - name: regsecret
       volumes:
-      - name: config
+      - name: mysql-config
         configMap:
-          name: prometheus-config
-      - name: prometheus-data
+          name: mysql-config
+      - name: mysql-data
         persistentVolumeClaim:
-          claimName: prometheus-data
+          claimName: mysql-data
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: prometheus
+  name: mysql
 spec:
   type: NodePort
   ports:
-  - port: 9090
-    targetPort: 9090
-    nodePort: 6379
+  - port: 3306
+    targetPort: 3306
+    nodePort: 3306
   selector:
-    app: prometheus
+    app: mysql
 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: prometheus-data
+  name: mysql-data
 spec:
   storageClassName: nfs-storage
   accessModes:
@@ -69,3 +63,5 @@ spec:
   resources:
     requests:
       storage: 5Gi
+
+---

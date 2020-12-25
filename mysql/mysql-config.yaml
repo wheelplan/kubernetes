@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+data:
+  my.cnf: |
+    [mysqld]
+    datadir = /var/lib/mysql
+    socket = /var/lib/mysql/mysql.sock
+    symbolic-links = 0
+    sql_mode = NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES
+    server_id = 1
+    log-bin = mysql-bin
+    binlog_format = row
+    max_binlog_size = 300M
+    expire_logs_days = 7
+    slow_query_log = 1
+    long_query_time = 3
+    slow-query-log-file = /var/lib/mysql/mysql-slow.log
+    skip_name_resolve
+    group_concat_max_len = 4294967295
+    
+    [mysqld_safe]
+    log-error = /var/log/mysqld.log
+    pid-file = /var/run/mysqld/mysqld.pid
