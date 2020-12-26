@@ -1,20 +1,13 @@
----
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: glusterfs
-  labels:
-    glusterfs: daemonset
-  annotations:
-    description: GlusterFS DaemonSet
-    tags: glusterfs
 spec:
   selector:
     matchLabels:
       glusterfs-node: pod
   template:
     metadata:
-      name: glusterfs
       labels:
         glusterfs-node: pod
     spec:
