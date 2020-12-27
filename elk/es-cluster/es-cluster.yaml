@@ -16,7 +16,7 @@ spec:
       terminationGracePeriodSeconds: 20
       containers:
       - name: es
-        image: elasticsearch:7.10.1
+        image: yuiya/edu:elasticsearch-v7.10.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9200
@@ -46,7 +46,6 @@ spec:
             memory: "1000Mi"
           limits:
             memory: "2000Mi"
-
   volumeClaimTemplates:
     - metadata:
         name: es-data
@@ -64,6 +63,7 @@ kind: Service
 metadata:
   name: es
 spec:
+  clusterIP: None
   ports:
     - name: rest
       port: 9200
@@ -71,6 +71,5 @@ spec:
     - name: inter
       port: 9300
       targetPort: 9300 
-  clusterIP: None
   selector: 
     app: es

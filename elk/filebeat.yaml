@@ -29,6 +29,10 @@ spec:
             value: es
           - name: ELASTICSEARCH_PORT
             value: "9200"
+          - name: ELASTICSEARCH_PASSWORD
+            value: linux2020
+          - name: ELASTICSEARCH_USERNAME
+            value: elastic
           - name: NODE_NAME
             valueFrom:
               fieldRef:
@@ -64,6 +68,8 @@ data:
     output.elasticsearch:
       host: '${NODE_NAME}'
       hosts: ['${ELASTICSEARCH_HOST:es}:${ELASTICSEARCH_PORT:9200}']
+      username: '${ELASTICSEARCH_USERNAME}'
+      password: '${ELASTICSEARCH_PASSWORD}'
       indices:
       - index: "containers-%{+yyyy.MM}"
         when.contains:

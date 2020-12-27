@@ -22,6 +22,10 @@ spec:
         env:
         - name: ELASTICSEARCH_HOSTS
           value: "http://es:9200"
+        - name: ELASTICSEARCH_PASSWORD
+          value: linux2020
+        - name: ELASTICSEARCH_USERNAME
+          value: elastic
         resources:
           requests:
             memory: "200Mi"
@@ -34,9 +38,11 @@ kind: Service
 metadata:
   name: kibana
 spec:
+  type: NodePort
   ports:
     - name: web
       port: 5601
       targetPort: 5601
+      nodePort: 6379
   selector: 
     app: kibana
