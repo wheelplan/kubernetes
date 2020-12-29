@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: filebeat
+spec:
+  selector:
+    matchLabels:
+      app: filebeat
+  template:
+    metadata:
+      labels:
+        app: filebeat
+    spec:
+      containers:
+      - name: filebeat
+        image: yuiya/edu:filebeat-7.10.1
+        imagePullPolicy: IfNotPresent
+        args: [
+            "-c", "/etc/filebeat.yml",
+            "-e",
+        ]
+        resources:
+          requests:
+            memory: "100Mi"
+          limits:
+            memory: "300Mi"
+        env:
+          - name: ELASTICSEARCH_HOST
+            value: es
+          - name: ELASTICSEARCH_PORT
+            value: "9200"
+          - name: ELASTICSEARCH_PASSWORD
+            value: linux2020
+          - name: ELASTICSEARCH_USERNAME
+            value: elastic
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+        volumeMounts:
+        - name: config
+          mountPath: /etc/filebeat.yml
+          subPath: filebeat.yml
+          readOnly: true
+        - name: docker
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: filebeat-config
+      - name: docker
+        hostPath:
+          path: /var/lib/docker/containers
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+data:
+  filebeat.yml: |
+    filebeat.inputs:
+    - type: log
+      paths:
+      - /var/lib/docker/containers/*/*.log
+      tags: ["kubernetes-containers"]
+
+    output.elasticsearch:
+      host: '${NODE_NAME}'
+      hosts: ['${ELASTICSEARCH_HOST:es}:${ELASTICSEARCH_PORT:9200}']
+      protocol: 'https'
+      username: '${ELASTICSEARCH_USERNAME}'
+      password: '${ELASTICSEARCH_PASSWORD}'
+      ssl.certificate_authorities: ["/usr/share/filebeat/elasticsearch-ca.pem"]
+      ssl.verification_mode: none
+      indices:
+      - index: "containers-%{+yyyy.MM}"
+        when.contains:
+          tags: "kubernetes-containers"

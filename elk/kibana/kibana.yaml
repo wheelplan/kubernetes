@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+spec:
+  selector:
+    matchLabels:
+      app: kibana
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: yuiya/edu:kibana-7.10.1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5601
+          name: web
+        env:
+        - name: ELASTICSEARCH_HOSTS
+          value: "https://es:9200"
+        - name: ELASTICSEARCH_PASSWORD
+          value: "linux2020"
+        - name: ELASTICSEARCH_USERNAME
+          value: elastic
+        resources:
+          requests:
+            memory: "200Mi"
+          limits:
+            memory: "500Mi"
+        volumeMounts:
+        - name: config
+          mountPath: /usr/share/kibana/config/kibana.yml
+          subPath: kibana.yml
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: kibana-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+spec:
+  type: NodePort
+  ports:
+    - name: web
+      port: 5601
+      targetPort: 5601
+      nodePort: 5601
+  selector: 
+    app: kibana
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kibana-config
+data:
+  kibana.yml: |
+    server.host: 0.0.0.0
+    elasticsearch.ssl.certificateAuthorities: "/usr/share/kibana/config/elasticsearch-ca.pem"
+    elasticsearch.ssl.truststore.password: ""
+    elasticsearch.ssl.verificationMode: none
+    xpack.encryptedSavedObjects.encryptionKey: "Hi!AreYouOkay?IHaveADream!IHopeTheWorldToBeGood!"
+    xpack.reporting.encryptionKey: "Hi!AreYouOkay?IHaveADream!IHopeTheWorldToBeGood!"
+    xpack.security.encryptionKey: "Hi!AreYouOkay?IHaveADream!IHopeTheWorldToBeGood!"
+    xpack.reporting.capture.browser.chromium.disableSandbox: false
+    i18n.locale: "zh-CN"
