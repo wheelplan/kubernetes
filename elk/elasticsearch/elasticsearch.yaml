@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: es
+  namespace: kube-system
 spec:
   selector:
     matchLabels:
@@ -70,6 +71,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: es
+  namespace: kube-system
 spec:
   clusterIP: None
   ports:
@@ -87,6 +89,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: es-config
+  namespace: kube-system
 data:
   elasticsearch.yml: |
     network.host: 0.0.0.0
