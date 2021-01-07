@@ -15,15 +15,14 @@ data:
     groups:
     - name: memory-rule
       rules:
-      - alert: "memory"
+      - alert: "memory_space"
         expr: (node_memory_MemTotal_bytes - (node_memory_MemFree_bytes+node_memory_Buffers_bytes+node_memory_Cached_bytes )) / node_memory_MemTotal_bytes * 100 > 80
         for: 30s
         labels:
           severity: warning
         annotations:
-          summary: "服务名:{{$labels.alertname}} 内存报警"
-          description: "{{ $labels.alertname }} 内存资源利用率大于 80%"
-          value: "{{ $value }}"
+          summary: "内存占用过高"
+          description: "{{ $labels.instance }} 内存资源利用率大于 80%"
     - name: node
       rules:
       - alert: server_status
