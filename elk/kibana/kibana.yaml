@@ -49,14 +49,36 @@ metadata:
   name: kibana
   namespace: kube-system
 spec:
-  type: NodePort
   ports:
-    - name: web
-      port: 5601
-      targetPort: 5601
-      nodePort: 5601
+    - port: 5601
   selector: 
     app: kibana
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kibana
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  tls:
+  - hosts:
+      - kibana.rocc.top
+    secretName: kibana-tls
+  rules:
+  - host: kibana.rocc.top
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kibana
+            port:
+              number: 5601
+
 
 ---
 apiVersion: v1

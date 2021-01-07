@@ -1,0 +1,178 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+    spec:
+      containers:
+      - name: alertmanager
+        image: prom/alertmanager:v0.21.0
+        command:
+        - "/bin/alertmanager"
+        args:
+        - "--config.file=/etc/alertmanager/alertmanager.yml"
+        - "--storage.path=/alertmanager"
+        - "--data.retention=177h"
+        - "--web.route-prefix=/"
+        ports:
+        - containerPort: 9093
+        volumeMounts:
+        - mountPath: "/alertmanager"
+          name: alertmanager-data
+        - mountPath: "/etc/alertmanager"
+          name: config
+        resources:
+          requests:
+            memory: 100Mi
+          limits:
+            memory: 300Mi
+      volumes:
+      - name: config
+        configMap:
+          name: alertmanager-config
+      - name: alertmanager-data
+        persistentVolumeClaim:
+          claimName: alertmanager-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  namespace: kube-system
+spec:
+  ports:
+  - port: 9093
+  selector:
+    app: alertmanager
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alertmanager
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  tls:
+  - hosts:
+      - alertmanager.rocc.top
+    secretName: alertmanager-tls
+  rules:
+  - host: alertmanager.rocc.top
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: alertmanager
+            port:
+              number: 9093
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: alertmanager-data
+  namespace: kube-system
+spec:
+  storageClassName: nfs-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: kube-system
+data:
+  alertmanager.yml: |
+    global:
+      resolve_timeout: 5m
+    
+    templates:
+      - "template.tmp"
+    
+    route:
+      group_by: ['alertname']
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 1m
+      receiver: 'wechat'
+    
+    receivers:
+    - name: 'wechat'
+      wechat_configs:
+      - corp_id: 'wwd327d0ea50c0dae0'
+        to_user: '@all'
+        agent_id: '1000006'
+        api_secret: 'OxvRDNkcJdMuRZycMZmzKgNS-4jTdaYac4aeAxj9Fic'
+        send_resolved: true
+
+  template.tmp: |
+    {{ define "wechat.default.message" }}
+    {{- if gt (len .Alerts.Firing) 0 -}}
+    {{- range $index, $alert := .Alerts -}}
+    {{- if eq $index 0 }}
+    ==========异常告警==========
+    告警类型: {{ $alert.Labels.alertname }}
+    告警级别: {{ $alert.Labels.severity }}
+    告警详情: {{ $alert.Annotations.message }}{{ $alert.Annotations.description}};{{$alert.Annotations.summary}}
+    故障时间: {{ ($alert.StartsAt.Add 28800e9).Format "2006-01-02 15:04:05" }}
+    {{- if gt (len $alert.Labels.instance) 0 }}
+    实例信息: {{ $alert.Labels.instance }}
+    {{- end }}
+    {{- if gt (len $alert.Labels.namespace) 0 }}
+    命名空间: {{ $alert.Labels.namespace }}
+    {{- end }}
+    {{- if gt (len $alert.Labels.node) 0 }}
+    节点信息: {{ $alert.Labels.node }}
+    {{- end }}
+    {{- if gt (len $alert.Labels.pod) 0 }}
+    实例名称: {{ $alert.Labels.pod }}
+    {{- end }}
+    ============END============
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- if gt (len .Alerts.Resolved) 0 -}}
+    {{- range $index, $alert := .Alerts -}}
+    {{- if eq $index 0 }}
+    ==========异常恢复==========
+    告警类型: {{ $alert.Labels.alertname }}
+    告警级别: {{ $alert.Labels.severity }}
+    告警详情: {{ $alert.Annotations.message }}{{ $alert.Annotations.description}};{{$alert.Annotations.summary}}
+    故障时间: {{ ($alert.StartsAt.Add 28800e9).Format "2006-01-02 15:04:05" }}
+    恢复时间: {{ ($alert.EndsAt.Add 28800e9).Format "2006-01-02 15:04:05" }}
+    {{- if gt (len $alert.Labels.instance) 0 }}
+    实例信息: {{ $alert.Labels.instance }}
+    {{- end }}
+    {{- if gt (len $alert.Labels.namespace) 0 }}
+    命名空间: {{ $alert.Labels.namespace }}
+    {{- end }}
+    {{- if gt (len $alert.Labels.node) 0 }}
+    节点信息: {{ $alert.Labels.node }}
+    {{- end }}
+    {{- if gt (len $alert.Labels.pod) 0 }}
+    实例名称: {{ $alert.Labels.pod }}
+    {{- end }}
+    ============END============
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- end }}

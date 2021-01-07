@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: redis
+        image: redis:5.0.9
+        imagePullPolicy: IfNotPresent
+        command:
+        - redis-server
+        - /conf/redis.conf
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "100Mi"
+          limits:
+            memory: "500Mi"
+        volumeMounts:
+        - name: config
+          mountPath: /conf
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: config
+        configMap:
+          name: redis-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: redis-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+spec:
+  type: NodePort
+  ports:
+  - port: 6379
+    targetPort: 6379
+    nodePort: 6379
+  selector:
+    app: redis
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-data
+spec:
+  storageClassName: nfs-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+data:
+  redis.conf: |
+    daemonize no
+    bind 0.0.0.0
+    port 6379
+    databases 16
+    dbfilename redis.rdb
+    save 900 1
+    save 300 10
+    save 60 10000
+    dir /data
+    appendonly yes
+    appendfilename redis.aof
+    appendfsync everysec
+    requirepass linux2020
