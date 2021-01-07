@@ -22,7 +22,7 @@ spec:
           name: web
         env:
         - name: ELASTICSEARCH_HOSTS
-          value: "https://es:9200"
+          value: "https://elasticsearch.rocc.top"
         - name: ELASTICSEARCH_PASSWORD
           value: "linux2020"
         - name: ELASTICSEARCH_USERNAME
@@ -89,9 +89,9 @@ metadata:
 data:
   kibana.yml: |
     server.host: 0.0.0.0
-    elasticsearch.ssl.certificateAuthorities: "/usr/share/kibana/config/elasticsearch-ca.pem"
-    elasticsearch.ssl.truststore.password: ""
-    elasticsearch.ssl.verificationMode: none
+    # elasticsearch.ssl.certificateAuthorities: "/usr/share/kibana/config/elasticsearch-ca.pem"
+    # elasticsearch.ssl.truststore.password: ""
+    # elasticsearch.ssl.verificationMode: none
     xpack.encryptedSavedObjects.encryptionKey: "Hi!AreYouOkay?IHaveADream!IHopeTheWorldToBeGood!"
     xpack.reporting.encryptionKey: "Hi!AreYouOkay?IHaveADream!IHopeTheWorldToBeGood!"
     xpack.security.encryptionKey: "Hi!AreYouOkay?IHaveADream!IHopeTheWorldToBeGood!"

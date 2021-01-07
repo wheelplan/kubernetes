@@ -40,11 +40,10 @@ data:
     output.elasticsearch:
       host: '${NODE_NAME}'
       hosts: ['${ELASTICSEARCH_HOST:es}:${ELASTICSEARCH_PORT:9200}']
-      protocol: 'https'
       username: '${ELASTICSEARCH_USERNAME}'
       password: '${ELASTICSEARCH_PASSWORD}'
-      ssl.certificate_authorities: ["/usr/share/filebeat/elasticsearch-ca.pem"]
-      ssl.verification_mode: none
+      # ssl.certificate_authorities: ["/usr/share/filebeat/elasticsearch-ca.pem"]
+      # ssl.verification_mode: none
 
 ---
 apiVersion: apps/v1
