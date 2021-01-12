@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: yuiya/nginx:v2
+        image: yuiya/edu:nginx-v2
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
