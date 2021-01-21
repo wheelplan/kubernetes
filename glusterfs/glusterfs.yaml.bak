@@ -18,6 +18,8 @@ spec:
       - image: gluster/gluster-centos:latest
         name: glusterfs
         volumeMounts:
+        - name: glusterfs-heketi
+          mountPath: "/var/lib/heketi"
         - name: glusterfs-run
           mountPath: "/run"
         - name: glusterfs-lvm
@@ -37,8 +39,7 @@ spec:
           readOnly: true
         - name: glusterfs-ssl
           mountPath: "/etc/ssl"
-        - name: glusterfs-vol
-          mountPath: "/vols"
+          readOnly: true
         securityContext:
           capabilities: {}
           privileged: true
@@ -59,6 +60,9 @@ spec:
             - "-c"
             - systemctl status glusterd.service
       volumes:
+      - name: glusterfs-heketi
+        hostPath:
+          path: "/var/lib/heketi"
       - name: glusterfs-run
       - name: glusterfs-lvm
         hostPath:
@@ -84,6 +88,3 @@ spec:
       - name: glusterfs-ssl
         hostPath:
           path: "/etc/ssl"
-      - name: glusterfs-vol
-        hostPath:
-          path: "/vols"

@@ -85,12 +85,27 @@ spec:
 
 ---
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: grafana-data
+  namespace: kube-system
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  glusterfs:
+    endpoints: "glusterfs"
+    path: "grafana"
+    readOnly: false
+
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: grafana-data
   namespace: kube-system
 spec:
-  storageClassName: nfs-storage
   accessModes:
     - ReadWriteOnce
   resources:

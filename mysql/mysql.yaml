@@ -54,11 +54,26 @@ spec:
 
 ---
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-data
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  glusterfs:
+    endpoints: "glusterfs"
+    path: "mysql"
+    readOnly: false
+
+
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-data
 spec:
-  storageClassName: nfs-storage
   accessModes:
     - ReadWriteOnce
   resources:
